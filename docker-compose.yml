@@ -1,0 +1,23 @@
+name: daf_web
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: daf_web_postgres
+    environment:
+      POSTGRES_DB: daf_web
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      - daf_web_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d daf_web"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  daf_web_postgres_data:
