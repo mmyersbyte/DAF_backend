@@ -5,7 +5,8 @@ import {
 
 export async function sendMessage(req, res) {
   try {
-    const { userId, conversationId, content } = req.body;
+    const userId = req.user.id;
+    const { conversationId, content } = req.body;
 
     const response = await sendMessageToBot({
       userId,
@@ -25,7 +26,7 @@ export async function sendMessage(req, res) {
 
 export async function listConversations(req, res) {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
 
     const conversations = await getUserConversations(userId);
 

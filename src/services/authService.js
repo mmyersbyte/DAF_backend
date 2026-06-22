@@ -1,5 +1,20 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
 import { prismaInstance } from '../lib/prismaInstance.js';
+
+function generateToken(user) {
+  return jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+    },
+    process.env.AUTH_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    },
+  );
+}
 
 export async function registerUser({ name, email, password }) {
   if (!name || !email || !password) {
@@ -59,9 +74,14 @@ export async function loginUser({ email, password }) {
     throw new Error('Email ou senha inválidos.');
   }
 
+  const token = generateToken(user);
+
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+    token,
   };
 }

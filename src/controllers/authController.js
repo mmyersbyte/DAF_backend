@@ -25,14 +25,15 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    const user = await loginUser({
+    const result = await loginUser({
       email,
       password,
     });
 
     return res.status(200).json({
       message: 'Login realizado com sucesso.',
-      user,
+      user: result.user,
+      token: result.token,
     });
   } catch (error) {
     return res.status(401).json({
