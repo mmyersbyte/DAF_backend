@@ -5,8 +5,9 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "poku",
+    "test:watch": "poku --watch",
+    "dev": "node --watch server.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
+    "poku": "^4.5.0",
     "prisma": "^7.8.0"
   }
 }
