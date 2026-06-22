@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+
 import authRoutes from './routes/authRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 export const app = express();
 
@@ -14,3 +16,4 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/chat', chatRoutes);
