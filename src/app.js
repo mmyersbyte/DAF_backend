@@ -7,6 +7,7 @@ import swaggerDocument from './docs/swagger.json' with { type: 'json' };
 
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
+import taxRoutes from './routes/taxRoutes.js';
 
 export const app = express();
 
@@ -22,3 +23,4 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
+app.use('/tax', taxRoutes);
