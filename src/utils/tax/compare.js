@@ -3,20 +3,34 @@ import { calcPJPsicologiaArquitetura2026 } from './pjServicos2026.js';
 import { calcPJAdvogado2026 } from './pjAdvogado2026.js';
 import { normalizeProfessionId } from './professions.js';
 
-// Comparativo PF × PJ — orquestrador único.
-
 export function compareTaxes({ rendaMensal, custosMensais, profissao }) {
-  const PF = calcPessoaFisica2026({ rendaMensal, custosMensais });
+  const renda = Number(rendaMensal);
+  const custos = Number(custosMensais);
 
-  const id = normalizeProfessionId(profissao);
+  const professionId = normalizeProfessionId(profissao);
+
+  const PF = calcPessoaFisica2026({
+    rendaMensal: renda,
+    custosMensais: custos,
+  });
+
   const PJ =
-    id === 'advogado'
-      ? calcPJAdvogado2026(rendaMensal)
-      : calcPJPsicologiaArquitetura2026(rendaMensal);
+    professionId === 'advogado'
+      ? calcPJAdvogado2026(renda)
+      : calcPJPsicologiaArquitetura2026(renda);
+
+  const bestOption =
+    PJ.liquido > PF.liquido ? 'PJ' : PF.liquido > PJ.liquido ? 'PF' : 'EMPATE';
 
   return {
-    input: { rendaMensal, custosMensais },
+    input: {
+      rendaMensal: renda,
+      custosMensais: custos,
+      profissao,
+      professionId,
+    },
     PF,
     PJ,
+    bestOption,
   };
 }
