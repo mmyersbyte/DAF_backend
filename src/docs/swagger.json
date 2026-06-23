@@ -2,12 +2,12 @@
   "openapi": "3.0.0",
   "info": {
     "title": "DAF Backend API",
-    "description": "Documentação da API do backend DAF_WEB com autenticação, JWT e chatbot.",
+    "description": "Documentação da API do backend DAF_WEB com autenticação, JWT, chatbot e cálculo tributário.",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
+      "url": "http://localhost:4000",
       "description": "Servidor local"
     }
   ],
@@ -23,6 +23,10 @@
     {
       "name": "Chat",
       "description": "Rotas do chatbot"
+    },
+    {
+      "name": "Tax",
+      "description": "Rotas de cálculo e histórico tributário"
     }
   ],
   "components": {
@@ -45,7 +49,7 @@
           "email": {
             "type": "string",
             "format": "email",
-            "example": "pedro@email.com"
+            "example": "[pedro@email.com](mailto:pedro@email.com)"
           },
           "password": {
             "type": "string",
@@ -60,7 +64,7 @@
           "email": {
             "type": "string",
             "format": "email",
-            "example": "pedro@email.com"
+            "example": "[pedro@email.com](mailto:pedro@email.com)"
           },
           "password": {
             "type": "string",
@@ -81,7 +85,7 @@
           },
           "email": {
             "type": "string",
-            "example": "pedro@email.com"
+            "example": "[pedro@email.com](mailto:pedro@email.com)"
           },
           "createdAt": {
             "type": "string",
@@ -131,6 +135,247 @@
           "content": {
             "type": "string",
             "example": "Olá! Como posso ajudar?"
+          }
+        }
+      },
+      "TaxCompareRequest": {
+        "type": "object",
+        "required": ["rendaMensal", "custosMensais", "profissao"],
+        "properties": {
+          "rendaMensal": {
+            "type": "number",
+            "example": 10000,
+            "description": "Renda mensal informada pelo usuário. O limite didático do projeto é R$ 15.000."
+          },
+          "custosMensais": {
+            "type": "number",
+            "example": 1500,
+            "description": "Custos mensais informados pelo usuário."
+          },
+          "profissao": {
+            "type": "string",
+            "enum": [
+              "Psicólogo",
+              "Psicóloga",
+              "Arquiteto",
+              "Arquiteta",
+              "Advogado",
+              "Advogada"
+            ],
+            "example": "Psicólogo"
+          }
+        }
+      },
+      "TaxInput": {
+        "type": "object",
+        "properties": {
+          "rendaMensal": {
+            "type": "number",
+            "example": 10000
+          },
+          "custosMensais": {
+            "type": "number",
+            "example": 1500
+          },
+          "profissao": {
+            "type": "string",
+            "example": "Psicólogo"
+          },
+          "professionId": {
+            "type": "string",
+            "example": "psicologo"
+          }
+        }
+      },
+      "TaxPFResult": {
+        "type": "object",
+        "properties": {
+          "inss": {
+            "type": "number",
+            "example": 1100
+          },
+          "ir": {
+            "type": "number",
+            "example": 1428.73
+          },
+          "isentoIR": {
+            "type": "boolean",
+            "example": false
+          },
+          "imposto": {
+            "type": "number",
+            "example": 2528.73
+          },
+          "effectiveRate": {
+            "type": "number",
+            "example": 0.25
+          },
+          "liquido": {
+            "type": "number",
+            "example": 7471.27
+          },
+          "modoIRPF": {
+            "type": "string",
+            "example": "deducoes"
+          },
+          "baseCalculoIR": {
+            "type": "number",
+            "example": 8500
+          }
+        }
+      },
+      "TaxPJResult": {
+        "type": "object",
+        "properties": {
+          "faturamento": {
+            "type": "number",
+            "example": 10000
+          },
+          "dasMensal": {
+            "type": "number",
+            "example": 600
+          },
+          "dasRowLabel": {
+            "type": "string",
+            "example": "DAS (Simples — Anexo III, 6%)"
+          },
+          "cppPatronal": {
+            "type": "number",
+            "example": 0
+          },
+          "prolabore": {
+            "type": "number",
+            "example": 2800
+          },
+          "inss": {
+            "type": "number",
+            "example": 308
+          },
+          "ir": {
+            "type": "number",
+            "example": 0
+          },
+          "isentoIR": {
+            "type": "boolean",
+            "example": true
+          },
+          "totalImpostos": {
+            "type": "number",
+            "example": 908
+          },
+          "effectiveRate": {
+            "type": "number",
+            "example": 0.09
+          },
+          "liquido": {
+            "type": "number",
+            "example": 9092
+          }
+        }
+      },
+      "TaxCompareResult": {
+        "type": "object",
+        "properties": {
+          "comparisonId": {
+            "type": "integer",
+            "example": 1
+          },
+          "input": {
+            "$ref": "#/components/schemas/TaxInput"
+          },
+          "PF": {
+            "$ref": "#/components/schemas/TaxPFResult"
+          },
+          "PJ": {
+            "$ref": "#/components/schemas/TaxPJResult"
+          },
+          "bestOption": {
+            "type": "string",
+            "enum": ["PF", "PJ", "EMPATE"],
+            "example": "PJ"
+          }
+        }
+      },
+      "TaxCompareResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Comparativo calculado e salvo com sucesso."
+          },
+          "result": {
+            "$ref": "#/components/schemas/TaxCompareResult"
+          }
+        }
+      },
+      "TaxComparisonHistoryItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "userId": {
+            "type": "integer",
+            "example": 1
+          },
+          "profession": {
+            "type": "string",
+            "example": "Psicólogo"
+          },
+          "professionId": {
+            "type": "string",
+            "example": "psicologo"
+          },
+          "monthlyIncome": {
+            "type": "number",
+            "example": 10000
+          },
+          "monthlyCosts": {
+            "type": "number",
+            "example": 1500
+          },
+          "pfTotalTax": {
+            "type": "number",
+            "example": 2528.73
+          },
+          "pjTotalTax": {
+            "type": "number",
+            "example": 908
+          },
+          "pfNetIncome": {
+            "type": "number",
+            "example": 7471.27
+          },
+          "pjNetIncome": {
+            "type": "number",
+            "example": 9092
+          },
+          "bestOption": {
+            "type": "string",
+            "example": "PJ"
+          },
+          "resultJson": {
+            "type": "object",
+            "example": {
+              "input": {
+                "rendaMensal": 10000,
+                "custosMensais": 1500,
+                "profissao": "Psicólogo",
+                "professionId": "psicologo"
+              },
+              "bestOption": "PJ"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-06-22T12:00:00.000Z"
           }
         }
       },
@@ -195,7 +440,7 @@
                   "user": {
                     "id": 1,
                     "name": "Pedro Victor",
-                    "email": "pedro@email.com",
+                    "email": "[pedro@email.com](mailto:pedro@email.com)",
                     "createdAt": "2026-06-22T12:00:00.000Z"
                   }
                 }
@@ -354,6 +599,156 @@
               "application/json": {
                 "example": {
                   "message": "Token não informado."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tax/compare": {
+      "post": {
+        "tags": ["Tax"],
+        "summary": "Calcula e salva o comparativo tributário do usuário autenticado",
+        "description": "Recebe renda mensal, custos mensais e profissão. O backend calcula PF x PJ, salva o resultado no PostgreSQL e retorna o comparativo.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxCompareRequest"
+              },
+              "example": {
+                "rendaMensal": 10000,
+                "custosMensais": 1500,
+                "profissao": "Psicólogo"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comparativo calculado e salvo com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxCompareResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação ou erro ao calcular o comparativo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou ausente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token não informado."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tax/comparisons": {
+      "get": {
+        "tags": ["Tax"],
+        "summary": "Lista os comparativos tributários do usuário autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de comparativos salvos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaxComparisonHistoryItem"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou ausente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token não informado."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tax/comparisons/{id}": {
+      "get": {
+        "tags": ["Tax"],
+        "summary": "Busca um comparativo tributário específico do usuário autenticado",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID do comparativo tributário",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comparativo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxComparisonHistoryItem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou ausente",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Token não informado."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Comparativo não encontrado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Comparativo não encontrado."
                 }
               }
             }
